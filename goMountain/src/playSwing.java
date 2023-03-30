@@ -1,19 +1,13 @@
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.awt.*;
+import java.awt.event.*;
+
+import java.sql.*;
 import java.util.*;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -36,13 +30,35 @@ public class playSwing extends JFrame implements ActionListener{
 		JPanel p1 =new JPanel();//배치방식 flowLayout
 		JPanel p2 =new JPanel();
 		
-		
-		
 		String [] Title= {"이름","폰번호","이메일","나이"};
 		Object [] [] row= new Object[0][4];
 		dtm= new DefaultTableModel(row,Title);
 		
 		jt=new JTable(dtm);
+		jt.addMouseListener(new MouseAdapter() {//어댑터클래스
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				// TODO Auto-generated method stub
+				int row=jt.getSelectedRow();
+				tf_name.setText(jt.getValueAt(row,0).toString());
+				tf_phone.setText(jt.getValueAt(row,1).toString());
+				tf_email.setText(jt.getValueAt(row,2).toString());
+				System.out.println(jt.getValueAt(row,3));
+				tf_age.setText((String)jt.getValueAt(row,3));
+				//toString는 null값을 문자로 바꾸지 못함.
+				
+			}
+
+			
+			
+		}
+				
+				
+				
+				
+				
+				);
 		
 		JScrollPane p3 =new JScrollPane(jt);
 		JLabel name =new JLabel("이름:");
@@ -65,18 +81,22 @@ public class playSwing extends JFrame implements ActionListener{
 		JButton bt3= new JButton("수정");
 		JButton bt4= new JButton("삭제");
 		JButton bt5= new JButton("추가");
+		JButton bt6= new JButton("리셋");
 		bt1.addActionListener(this);
 		bt2.addActionListener(this);
 		bt3.addActionListener(this);
 		bt4.addActionListener(this);
 		bt5.addActionListener(this);
+		bt6.addActionListener(this);
 		p2.add(bt1);
 		p2.add(bt2);
 		p2.add(bt3);
 		p2.add(bt4);
 		p2.add(bt5);
+		p2.add(bt6);
+		
 		p1.setBounds(10, 10, 250, 100);
-		p2.setBounds(10, 130, 400, 40);
+		p2.setBounds(10, 130, 450, 40);
 		p3.setBounds(10, 180, 460, 570);
 		p3.setBackground(Color.white);
 		this.add(p1);this.add(p2);this.add(p3);
@@ -100,19 +120,24 @@ public class playSwing extends JFrame implements ActionListener{
 	
 		String cmd= e.getActionCommand();
 		if(cmd.equals("전화번호")) {
-			display();
+			display(0);
 		}
 			
 		else if(cmd.equals("검색")) {
 			//tf.setBackground(Color.red);
+			display(1);
 			
 		}
 		else if(cmd.equals("수정")) {
 			//tf.setFont(new Font("궁서체",Font.BOLD,20));
+			update();
+			display(0);
 			
 		}
 		else if(cmd.equals("삭제")) {
 			//tf.setText("");
+			delete();
+			display(0);
 			
 	
 		}
@@ -123,22 +148,51 @@ public class playSwing extends JFrame implements ActionListener{
 			
 	
 		}
+		else if(cmd.equals("리셋")) {
+			tf_name.setText("");
+			tf_email.setText("");
+			tf_phone.setText("");
+			tf_age.setText("");
+		}
 		
 			
 	}
-	public ResultSet select() {
+	public ResultSet select(int kind) {
 		con=makeConnection();
 		if(con != null) {
-			String sql="select * from person";
+			String sql;
 			try {
-				ps = con.prepareStatement(sql);//prepareStatement-> 메서드
+				if (kind==0) {//전화번호부 전체조회
+					sql="select * from person";
+					ps = con.prepareStatement(sql,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_UPDATABLE);
+					
+					
+				}
+				else {//전화번호부 검색
+					sql="select * from person where name= ? ";
+					ps = con.prepareStatement(sql,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_UPDATABLE);
+					ps.setString(1, tf_name.getText());
+				}
+			
+			
+				//prepareStatement-> 메서드
 				rs= ps.executeQuery();//select실행시 ->테이블 변화 없음
-				//ps.executeUpdate();//insert,delete,update 실행시 ->테이블 변화줌
-//				System.out.println("==========phonebook==========");
-//				System.out.println("이름"+"\t"+"전화번호"+"\t"+"이메일"+"\t"+"나이"+"\t");
-//				while(rs.next()==true)
-//					System.out.println(rs.getString("name")+"\t"+rs.getString(2)+"\t"+rs.getString(3)+"\t"+rs.getInt("age"));//첫번재부터 차례로 가리키는 메서드 sql 인덱스는 1번 부터
-//					//System.out.println(rs.getRow());열번호만 나옴..
+				System.out.println(rs);
+				if(rs.next()) {
+					rs.beforeFirst();
+						
+				}
+				else {
+					JOptionPane.showMessageDialog(this,"검색되지 않습니다.");
+					sql="select * from person";
+					ps = con.prepareStatement(sql,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_UPDATABLE);
+					rs= ps.executeQuery();
+					
+				}
+					
+					
+			
+	
 					
 				
 			} catch (SQLException e) {
@@ -162,7 +216,7 @@ public class playSwing extends JFrame implements ActionListener{
 			else
 				sql="insert into person values(?,?,?,?)";
 				
-//			
+			int x=0;
 			
 			try {
 				ps=con.prepareStatement(sql);
@@ -171,10 +225,15 @@ public class playSwing extends JFrame implements ActionListener{
 				ps.setString(3,tf_email.getText());
 				if(!tf_age.getText().equals(""))
 					ps.setInt(4,Integer.parseInt(tf_age.getText()));
-				ps.executeUpdate();
+				
+				x=ps.executeUpdate();
 				
 				
 			}catch(SQLException ex){
+				if(x==0) {
+					JOptionPane.showMessageDialog(this,"전화번호가 중복되었거나 필수입력사항을 입력하지 않았습니다.");
+					
+				}
 				
 				
 				
@@ -187,28 +246,19 @@ public class playSwing extends JFrame implements ActionListener{
 	public  void delete() {
 		con=makeConnection();
 		if(con != null) {
-			Scanner in=new Scanner(System.in);
-			System.out.println("전화번호 입력");
-			String key=in.nextLine();
-			//입력받은 key(전화번호) 값과 일치하는 회원이 존재여부 확인
-			String sql="select * from person where phone = ? ";
+			
+			
+			
 			try {
+				String sql="delete from person where phone = ? ";
 				ps=con.prepareStatement(sql);
-				ps.setString(1, key);
-				rs=ps.executeQuery();
-				if(rs.next()) {//일치하는 번호가 있을때
+				ps.setString(1,tf_phone.getText());
+				ps.executeUpdate();
 					
-					sql="delete from person where phone = ?";
-					ps=con.prepareStatement(sql);
-					ps.setString(1, key);
-					ps.executeUpdate();
-					
-				}
-				else {
-					System.out.println("전화번호가 일치하는 회원이 없습니다.");
 				}
 				
-			}catch(SQLException e) {
+				
+			catch(SQLException e) {
 				
 			}
 			
@@ -219,31 +269,25 @@ public class playSwing extends JFrame implements ActionListener{
 	public  void update() {
 		con=makeConnection();
 		if(con != null) {
-			Scanner in=new Scanner(System.in);
-			System.out.println("전화번호 입력");
-			String key=in.nextLine();
-			//입력받은 key(전화번호) 값과 일치하는 회원이 존재여부 확인
-			String sql="select * from person where phone = ? ";
+			
 			try {
-				ps=con.prepareStatement(sql);
-				ps.setString(1, key);
-				rs=ps.executeQuery();
-				if(rs.next()) {//일치하는 번호가 있을때
-					System.out.println("이메일 입력");
-					String e=in.nextLine();
-					System.out.println("나이입력");
-					int n=in.nextInt();
-					sql="update person set email=?,age=? where phone=?";
-					ps=con.prepareStatement(sql);
-					ps.setString(1, e);
-					ps.setInt(2, n);
-					ps.setString(3, key);
-					ps.executeUpdate();
+		
+				String sql="update person set name=?, email=?,age=? where phone=?";
 					
-				}
-				else {
-					System.out.println("전화번호가 일치하는 회원이 없습니다.");
-				}
+				ps=con.prepareStatement(sql);
+				ps.setString(1,tf_name.getText());
+				ps.setString(2,tf_email.getText());
+				if(tf_age.getText().equals(""))
+					ps.setString(3,null);
+				else
+					ps.setInt(3,Integer.parseInt(tf_age.getText()));
+				ps.setString(4,tf_phone.getText());
+				
+					
+				ps.executeUpdate();
+					
+				
+				
 				
 			}catch(SQLException e) {
 				
@@ -252,9 +296,8 @@ public class playSwing extends JFrame implements ActionListener{
 		}
 		
 	}
-	public void display() {
-		
-		rs=select();
+	public void display(int kind) {
+		rs=select(kind);
 		try {
 			String info[]=new String[4];
 			dtm.setRowCount(0);//행개수를 0이되게 설정
