@@ -12,6 +12,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.table.DefaultTableModel;
 public class playSwing extends JFrame implements ActionListener{
 	//JFrame 배치 방식은 BorderLayout 방식(동서남북센터, 기본:센터)
@@ -29,6 +31,7 @@ public class playSwing extends JFrame implements ActionListener{
 		this.setLayout(null);//맨위줄, 중앙에 차례로 배치
 		JPanel p1 =new JPanel();//배치방식 flowLayout
 		JPanel p2 =new JPanel();
+		
 		
 		String [] Title= {"이름","폰번호","이메일","나이"};
 		Object [] [] row= new Object[0][4];
@@ -107,7 +110,18 @@ public class playSwing extends JFrame implements ActionListener{
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+		try{
+			//UIManager.setLookAndFeel("com.birosoft.liquid.LiquidLookAndFeel");
+			//UIManager.setLookAndFeel ("motif.MotifLookAndFeel");
+			UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+			//UIManager.setLookAndFeel ("javax.swing.plaf.metal.MetalLookAndFeel");//LookAndFeel Windows 스타일 적용
+			//SwingUtilities.updateComponentTreeUI();
+			JFrame.setDefaultLookAndFeelDecorated(true); 
+		}catch(Exception e){
+			e.getMessage();
+		}
 		new playSwing();//new 생성자;
+		
 		
 		
 
@@ -121,6 +135,7 @@ public class playSwing extends JFrame implements ActionListener{
 		String cmd= e.getActionCommand();
 		if(cmd.equals("전화번호")) {
 			display(0);
+			
 		}
 			
 		else if(cmd.equals("검색")) {
