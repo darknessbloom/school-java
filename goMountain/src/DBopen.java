@@ -10,6 +10,29 @@ public class DBopen {
 	PreparedStatement ps =null;
 	ResultSet rs = null;//select한  결과를 리턴받는 객체
 	Connection con=null;
+	public ResultSet select() {
+		con=makeConnection();
+		if(con != null) {
+			String sql;
+			try {
+				//distinct 중복데이터가 있으면 1개만 가져오는것.
+				sql="select distinct date_num from memo";
+				
+				ps = con.prepareStatement(sql,ResultSet.TYPE_SCROLL_INSENSITIVE,ResultSet.CONCUR_UPDATABLE);
+				
+				rs= ps.executeQuery();//select실행시 ->테이블 변화 없음
+				
+				} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				System.out.println("ps 객체생성 오류");
+				e.printStackTrace();//추적정보출력
+			}
+			
+			
+		}
+		return rs;
+		
+	}
 	public ResultSet select(String dd) {
 		con=makeConnection();
 		if(con != null) {
@@ -32,35 +55,30 @@ public class DBopen {
 		return rs;
 		
 	}
-	/*
-	public void insert() {
+	
+	public void insert(String dd,String msg) {
 		con=makeConnection();
 		//Scanner in=new Scanner(System.in);
 		if(con != null) {
 			String sql;
-			if(tf_age.getText().equals(""))
-				sql="insert into person(name,phone,email) values(?,?,?)";
-			else
-				sql="insert into person values(?,?,?,?)";
+			
+			sql="insert into memo values(null,?,?)";
+			
 				
 			int x=0;
 			
 			try {
 				ps=con.prepareStatement(sql);
-				ps.setString(1,tf_name.getText());
-				ps.setString(2,tf_phone.getText());
-				ps.setString(3,tf_email.getText());
-				if(!tf_age.getText().equals(""))
-					ps.setInt(4,Integer.parseInt(tf_age.getText()));
+				ps.setString(1, dd);
+				ps.setString(2,msg);
 				
 				x=ps.executeUpdate();
+				if(x==1)
+					System.out.println("추가성공");
 				
 				
 			}catch(SQLException ex){
-				if(x==0) {
-					JOptionPane.showMessageDialog(this,"전화번호가 중복되었거나 필수입력사항을 입력하지 않았습니다.");
-					
-				}
+				System.out.println("추가실패!");
 				
 				
 				
@@ -70,7 +88,7 @@ public class DBopen {
 		
 		
 	}
-	public  void delete() {
+	/*public  void delete() {
 		con=makeConnection();
 		if(con != null) {
 			

@@ -6,8 +6,15 @@ import java.sql.*;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import javax.swing.*;
+import javax.swing.border.LineBorder;
+import javax.swing.border.MatteBorder;
 
-class CalendarDataManager{ // 6*7배열에 나타낼 달력 값을 구하는 class
+
+
+
+//////////CalendarDataManager클래스/////////////////////
+
+/*class CalendarDataManager{ // 6*7배열에 나타낼 달력 값을 구하는 class
 	static final int CAL_WIDTH = 7;
 	final static int CAL_HEIGHT = 6;
 	int calDates[][] = new int[CAL_HEIGHT][CAL_WIDTH];
@@ -69,7 +76,17 @@ class CalendarDataManager{ // 6*7배열에 나타낼 달력 값을 구하는 cla
 		cal = new GregorianCalendar(calYear,calMonth,calDayOfMon);
 		makeCalData(cal);
 	}
-}
+}*/
+
+
+
+
+
+
+
+
+
+/////MemoCalendar클래스///
 
 public class MemoCalendar extends CalendarDataManager{ // CalendarDataManager의 GUI + 메모기능 + 시계
 	// 창 구성요소와 배치도
@@ -115,7 +132,8 @@ public class MemoCalendar extends CalendarDataManager{ // CalendarDataManager의
 	final String DelButMsg2 = "작성되지 않았거나 이미 삭제된 memo입니다.";
 	final String DelButMsg3 = "<html><font color=red>ERROR : 파일 삭제 실패</html>";
 	final String ClrButMsg1 = "입력된 메모를 비웠습니다.";
-
+	DBopen db= new DBopen();
+	
 	public static void main(String[] args){
 		SwingUtilities.invokeLater(new Runnable(){
 			public void run(){
@@ -127,7 +145,7 @@ public class MemoCalendar extends CalendarDataManager{ // CalendarDataManager의
 		
 		mainFrame = new JFrame(title);
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		mainFrame.setSize(700,400);
+		mainFrame.setSize(800,400);
 		mainFrame.setLocationRelativeTo(null);
 		mainFrame.setResizable(false);
 		mainFrame.setIconImage(icon.getImage());
@@ -201,13 +219,18 @@ public class MemoCalendar extends CalendarDataManager{ // CalendarDataManager의
 		weekDaysName = new JButton[7];
 		for(int i=0 ; i<CAL_WIDTH ; i++){
 			weekDaysName[i]=new JButton(WEEK_DAY_NAME[i]);
-			weekDaysName[i].setBorderPainted(false);
+			weekDaysName[i].setBorderPainted(false);//테두리에 선긋지말라는 뜻
+			//LineBorder bb = new LineBorder(Color.black, 5, true); 
+			//weekDaysName[i].setBorder(bb);
+			//weekDaysName[i].setBorder(BorderFactory.createMatteBorder(0, 0, 0, 0, Color.blue));
+			//버튼의 색 설정
 			weekDaysName[i].setContentAreaFilled(false);
 			weekDaysName[i].setForeground(Color.WHITE);
-			if(i == 0) weekDaysName[i].setBackground(new Color(200, 50, 50));
-			else if (i == 6) weekDaysName[i].setBackground(new Color(50, 100, 200));
-			else weekDaysName[i].setBackground(new Color(150, 150, 150));
+			if(i == 0) weekDaysName[i].setBackground(new Color(200, 50, 50));//일요일
+			else if (i == 6) weekDaysName[i].setBackground(new Color(50, 100, 200));//토요일
+			else weekDaysName[i].setBackground(new Color(150, 150, 150));//나머지요일
 			weekDaysName[i].setOpaque(true);
+			//setFocusPainted->버튼 누를때 윤곽이 보이게 하는것.
 			weekDaysName[i].setFocusPainted(false);
 			calPanel.add(weekDaysName[i]);
 		}
@@ -237,35 +260,26 @@ public class MemoCalendar extends CalendarDataManager{ // CalendarDataManager의
 		memoPanel=new JPanel();
 		memoPanel.setBorder(BorderFactory.createTitledBorder("Memo"));
 		memoArea = new JTextArea();
+		//setLineWrap(true) 텍스트가 길어지면 자동줄바꿈이 되도록 설정
 		memoArea.setLineWrap(true);
+		//memoArea.setWrapStyleWord(true);->단어 단위로 줄바꿈.
 		memoArea.setWrapStyleWord(true);
 		memoAreaSP = new JScrollPane(memoArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		readMemo();
 			
 		memoSubPanel=new JPanel();
-		saveBut = new JButton("Save"); 
+		saveBut = new JButton("Create"); 
 		saveBut.addActionListener(new ActionListener(){//디비로 저장하도록
 			public void actionPerformed(ActionEvent arg0) {
-				try {
-					File f= new File("MemoData");
-					if(!f.isDirectory()) f.mkdir();
-					
-					String memo = memoArea.getText();
-					if(memo.length()>0){
-						BufferedWriter out = new BufferedWriter(new FileWriter("MemoData/"+calYear+((calMonth+1)<10?"0":"")+(calMonth+1)+(calDayOfMon<10?"0":"")+calDayOfMon+".txt"));
-						String str = memoArea.getText();
-						out.write(str);  
-						out.close();
-						bottomInfo.setText(calYear+((calMonth+1)<10?"0":"")+(calMonth+1)+(calDayOfMon<10?"0":"")+calDayOfMon+".txt"+SaveButMsg1);
-					}
-					else 
-						bottomInfo.setText(SaveButMsg2);
-				} catch (IOException e) {
-					bottomInfo.setText(SaveButMsg3);
+				String msg=JOptionPane.showInputDialog(null,"새로운일정을 입력하세요!");
+				if(!msg.equals("")) {
+					String dd=""+calYear+((calMonth+1)<10?"0":"")+(calMonth+1)+(calDayOfMon<10?"0":"")+calDayOfMon;
+					db.insert(dd, msg);
 				}
 					showCal();
+					readMemo();
 				}					
-			});
+		});
 		delBut = new JButton("Delete");
 		delBut.addActionListener(new ActionListener(){//디비에 해당내용이 삭제되도록...
 		public void actionPerformed(ActionEvent e) {
@@ -290,7 +304,7 @@ public class MemoCalendar extends CalendarDataManager{ // CalendarDataManager의
 		memoSubPanel.add(saveBut);
 		memoSubPanel.add(delBut);
 		memoSubPanel.add(clearBut);
-	memoPanel.setLayout(new BorderLayout());
+		memoPanel.setLayout(new BorderLayout());
 		memoPanel.add(selectedDate, BorderLayout.NORTH);
 		memoPanel.add(memoAreaSP,BorderLayout.CENTER);
 		memoPanel.add(memoSubPanel,BorderLayout.SOUTH);
@@ -314,7 +328,7 @@ public class MemoCalendar extends CalendarDataManager{ // CalendarDataManager의
 		frameSubPanelEast.add(memoPanel,BorderLayout.CENTER);
 
 		Dimension frameSubPanelWestSize = frameSubPanelWest.getPreferredSize();
-		frameSubPanelWestSize.width = 410;
+		frameSubPanelWestSize.width = 450;
 		frameSubPanelWest.setPreferredSize(frameSubPanelWestSize);
 		
 		//뒤늦게 추가된 bottom Panel..
@@ -334,6 +348,8 @@ public class MemoCalendar extends CalendarDataManager{ // CalendarDataManager의
 		ThreadConrol threadCnl = new ThreadConrol();
 		threadCnl.start();	
 	}
+	/////////////////////MemoCalendar() 생성자의 끝...///////////////////////////
+	
 	private void focusToday(){
 		if(today.get(Calendar.DAY_OF_WEEK) == 1)
 			dateButs[today.get(Calendar.WEEK_OF_MONTH)][today.get(Calendar.DAY_OF_WEEK)-1].requestFocusInWindow();
@@ -374,17 +390,44 @@ public class MemoCalendar extends CalendarDataManager{ // CalendarDataManager의
 		}
 	}
 	private void showCal(){
+		Connection con=db.makeConnection();
+		ResultSet rs=db.select();
 		for(int i=0;i<CAL_HEIGHT;i++){
 			for(int j=0;j<CAL_WIDTH;j++){
 				String fontColor="black";
 				if(j==0) fontColor="red";
 				else if(j==6) fontColor="blue";
 				
-				File f =new File("MemoData/"+calYear+((calMonth+1)<10?"0":"")+(calMonth+1)+(calDates[i][j]<10?"0":"")+calDates[i][j]+".txt");
-				if(f.exists()){
-					dateButs[i][j].setText("<html><b><font color="+fontColor+">"+calDates[i][j]+"</font></b></html>");
+				
+				if(calDates[i][j]!=0) {
+					String dd=""+calYear+((calMonth+1)<10?"0":"")+(calMonth+1)+(calDates[i][j]<10?"0":"")+calDates[i][j];
+					System.out.println(dd);
+					
+					try {
+						
+						
+						dateButs[i][j].setText("<html><font color="+fontColor+">"+calDates[i][j]+"</font></html>");
+						rs.beforeFirst();//계속진하게 유지하는것.
+						while(rs.next()) {
+							
+				
+							if(rs.getString(1).equals(dd)) {
+								
+								dateButs[i][j].setText("<html><b><i><font color="+fontColor+">"+calDates[i][j]+"</font></b></html>");
+								
+							}
+//							
+//				
+						}
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
-				else dateButs[i][j].setText("<html><font color="+fontColor+">"+calDates[i][j]+"</font></html>");
+				
+				
+				
+				
 
 				JLabel todayMark = new JLabel("<html><font color=green>*</html>");
 				dateButs[i][j].removeAll();
@@ -400,6 +443,8 @@ public class MemoCalendar extends CalendarDataManager{ // CalendarDataManager의
 			}
 		}
 	}
+	
+	//////이름있는 내부중첩클래스 MemoCalendar클래스가 ACtionevent가 발생하면  ListenForCalOpButtons처리/////////
 	private class ListenForCalOpButtons implements ActionListener{
 		public void actionPerformed(ActionEvent e) {
 			if(e.getSource() == todayBut){
@@ -416,6 +461,7 @@ public class MemoCalendar extends CalendarDataManager{ // CalendarDataManager의
 			showCal();
 		}
 	}
+	//////////////
 	private class listenForDateButs implements ActionListener{
 		public void actionPerformed(ActionEvent e) {
 			int k=0,l=0;
