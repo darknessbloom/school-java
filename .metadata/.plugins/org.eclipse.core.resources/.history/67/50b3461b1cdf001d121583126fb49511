@@ -1,0 +1,18 @@
+package NotePad;
+
+import javax.swing.*;
+
+public class MemoJang extends JFrame{
+	public MemoJang() {
+		this.setTitle("jsk memo");
+		this.setBounds(100,500,500,500);
+		this.setVisible(true);
+	}
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		new MemoJang();
+
+	}
+
+}

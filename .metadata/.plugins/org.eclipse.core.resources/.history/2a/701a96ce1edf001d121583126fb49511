@@ -1,0 +1,46 @@
+package NotePad;
+
+import java.awt.Color;
+
+import javax.swing.*;
+
+public class MemoJang extends JFrame{
+	JTextArea ta=new JTextArea();
+	public MemoJang() {
+		this.setTitle("jsk memo");
+		this.setBounds(100,500,500,500);
+		makeMenu();
+		JScrollPane jp=new JScrollPane(ta);
+		this.add(jp);
+		this.setVisible(true);
+	}
+	public void makeMenu() {
+		JMenuBar mb=new JMenuBar();
+		JMenu file=new JMenu("파일");
+		JMenuItem file_new= new JMenuItem("새파일");
+		JMenuItem file_open= new JMenuItem("열기");
+		JMenuItem file_save= new JMenuItem("저장");
+		JMenuItem file_saveAs= new JMenuItem("다른이름으로 저장");
+		JMenuItem file_exit= new JMenuItem("끝내기");
+		file.add(file_new);	file.add(file_open);
+		file.addSeparator();
+		file.add(file_save);file.add(file_saveAs);
+		file.addSeparator();
+		file.add(file_exit);
+		JMenu edit=new JMenu("편집");
+		JMenu form=new JMenu("서식");
+		JMenu view=new JMenu("보기");
+		JMenu help=new JMenu("도움말");
+		
+		mb.add(file);mb.add(edit);mb.add(form);mb.add(view);mb.add(help);
+		this.setJMenuBar(mb);//메뉴바 거는 방법
+		
+	}
+
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		new MemoJang();
+
+	}
+
+}

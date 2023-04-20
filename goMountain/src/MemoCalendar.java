@@ -1,6 +1,8 @@
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.*;
 import java.sql.*;
 import java.util.Calendar;
@@ -8,6 +10,7 @@ import java.util.GregorianCalendar;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import javax.swing.border.MatteBorder;
+import javax.swing.table.DefaultTableModel;
 
 
 
@@ -113,7 +116,11 @@ public class MemoCalendar extends CalendarDataManager{ // CalendarDataManager의
 	
 	JPanel memoPanel;
 	JLabel selectedDate;
-	JTextArea memoArea;
+	
+	//JTextArea memoArea;
+	JTable jt;
+	DefaultTableModel dtm;
+	
 	JScrollPane memoAreaSP;
 	JPanel memoSubPanel;
 	JButton saveBut; 
@@ -132,6 +139,7 @@ public class MemoCalendar extends CalendarDataManager{ // CalendarDataManager의
 	final String DelButMsg2 = "작성되지 않았거나 이미 삭제된 memo입니다.";
 	final String DelButMsg3 = "<html><font color=red>ERROR : 파일 삭제 실패</html>";
 	final String ClrButMsg1 = "입력된 메모를 비웠습니다.";
+	String del_key="";//삭제될수도 있는 일정의 pk값
 	DBopen db= new DBopen();
 	
 	public static void main(String[] args){
@@ -259,12 +267,35 @@ public class MemoCalendar extends CalendarDataManager{ // CalendarDataManager의
 						
 		memoPanel=new JPanel();
 		memoPanel.setBorder(BorderFactory.createTitledBorder("Memo"));
-		memoArea = new JTextArea();
+		//memoArea = new JTextArea();
+		String [] Title= {"번호","일정내용"};
+		Object [] [] row= new Object[0][2];
+		dtm= new DefaultTableModel(row,Title);
+		jt=new JTable(dtm);
+		jt.addMouseListener(new MouseAdapter() {//어댑터클래스
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				// TODO Auto-generated method stub
+				int row=jt.getSelectedRow();
+				del_key=jt.getValueAt(row,0).toString();
+				System.out.println(del_key);
+				
+			}
+
+			
+			
+		}
+				
+				
+				
+				
+				
+			);
 		//setLineWrap(true) 텍스트가 길어지면 자동줄바꿈이 되도록 설정
-		memoArea.setLineWrap(true);
+		//memoArea.setLineWrap(true);
 		//memoArea.setWrapStyleWord(true);->단어 단위로 줄바꿈.
-		memoArea.setWrapStyleWord(true);
-		memoAreaSP = new JScrollPane(memoArea, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		//memoArea.setWrapStyleWord(true);
+		memoAreaSP = new JScrollPane(jt, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		readMemo();
 			
 		memoSubPanel=new JPanel();
@@ -283,21 +314,35 @@ public class MemoCalendar extends CalendarDataManager{ // CalendarDataManager의
 		delBut = new JButton("Delete");
 		delBut.addActionListener(new ActionListener(){//디비에 해당내용이 삭제되도록...
 		public void actionPerformed(ActionEvent e) {
-			memoArea.setText("");
-			File f =new File("MemoData/"+calYear+((calMonth+1)<10?"0":"")+(calMonth+1)+(calDayOfMon<10?"0":"")+calDayOfMon+".txt");
-			if(f.exists()){
-				f.delete();
+			if (!del_key.equals("")) {
+				
+				int key=Integer.parseInt(del_key);
+				System.out.println(key);
+				db.delete(key);
 				showCal();
-				bottomInfo.setText(DelButMsg1);
+				readMemo();
+				del_key="";
+				//삭제후 초기화
 			}
 			else 
-				bottomInfo.setText(DelButMsg2);					
+				bottomInfo.setText(DelButMsg2);	
+			
+//			memoArea.setText("");
+//			File f =new File("MemoData/"+calYear+((calMonth+1)<10?"0":"")+(calMonth+1)+(calDayOfMon<10?"0":"")+calDayOfMon+".txt");
+//			if(f.exists()){
+//				f.delete();
+//				showCal();
+//				bottomInfo.setText(DelButMsg1);
+//			}
+//			else 
+//				bottomInfo.setText(DelButMsg2);					
 		}					
 		});
 		clearBut = new JButton("Clear");
 		clearBut.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent arg0) {
-				memoArea.setText(null);
+				//memoArea.setText(null);
+				dtm.setRowCount(0);
 				bottomInfo.setText(ClrButMsg1);
 			}
 		});
@@ -365,9 +410,14 @@ public class MemoCalendar extends CalendarDataManager{ // CalendarDataManager의
 			ResultSet rs=db.select(dd);
 			if(rs !=null) {
 				System.out.println("셀렉트 성공");
-				memoArea.setText("");
-				while(rs.next())
-					memoArea.append(rs.getString("date_val"));
+				dtm.setRowCount(0);//뿌려주기 전에 초기화.
+				String info[]=new String[2];
+				while(rs.next()) {
+					info[0]=rs.getString("id");
+					info[1]=rs.getString("date_val");
+					dtm.addRow(info);
+				}
+					
 				
 				
 			}
@@ -406,7 +456,7 @@ public class MemoCalendar extends CalendarDataManager{ // CalendarDataManager의
 					try {
 						
 						
-						dateButs[i][j].setText("<html><font color="+fontColor+">"+calDates[i][j]+"</font></html>");
+						//dateButs[i][j].setText("<html><font color="+fontColor+">"+calDates[i][j]+"</font></html>");
 						rs.beforeFirst();//계속진하게 유지하는것.
 						while(rs.next()) {
 							
@@ -414,8 +464,11 @@ public class MemoCalendar extends CalendarDataManager{ // CalendarDataManager의
 							if(rs.getString(1).equals(dd)) {
 								
 								dateButs[i][j].setText("<html><b><i><font color="+fontColor+">"+calDates[i][j]+"</font></b></html>");
+								break;
 								
 							}
+							else
+								dateButs[i][j].setText("<html><font color="+fontColor+">"+calDates[i][j]+"</font></html>");
 //							
 //				
 						}
@@ -467,7 +520,7 @@ public class MemoCalendar extends CalendarDataManager{ // CalendarDataManager의
 			int k=0,l=0;
 			for(int i=0 ; i<CAL_HEIGHT ; i++){
 				for(int j=0 ; j<CAL_WIDTH ; j++){
-					if(e.getSource() == dateButs[i][j]){ 
+					if(e.getSource() == dateButs[i][j]){ //Source객체를 가져옴.
 						k=i;
 						l=j;
 					}
@@ -476,7 +529,7 @@ public class MemoCalendar extends CalendarDataManager{ // CalendarDataManager의
 	
 			if(!(k ==0 && l == 0)) calDayOfMon = calDates[k][l]; //today버튼을 눌렀을때도 이 actionPerformed함수가 실행되기 때문에 넣은 부분
 
-			cal = new GregorianCalendar(calYear,calMonth,calDayOfMon);
+			cal = new GregorianCalendar(calYear,calMonth,calDayOfMon);//날짜정보 생성
 			
 			String dDayString = new String();
 			int dDay=((int)((cal.getTimeInMillis() - today.getTimeInMillis())/1000/60/60/24));

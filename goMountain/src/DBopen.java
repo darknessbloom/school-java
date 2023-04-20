@@ -88,16 +88,16 @@ public class DBopen {
 		
 		
 	}
-	/*public  void delete() {
+public  void delete(int id) {
 		con=makeConnection();
 		if(con != null) {
 			
 			
 			
 			try {
-				String sql="delete from person where phone = ? ";
+				String sql="delete from memo where id = ? ";
 				ps=con.prepareStatement(sql);
-				ps.setString(1,tf_phone.getText());
+				ps.setInt(1,id);
 				ps.executeUpdate();
 					
 				}
@@ -111,7 +111,7 @@ public class DBopen {
 		
 	}
 	
-	public  void update() {
+	/*public  void update() {
 		con=makeConnection();
 		if(con != null) {
 			
