@@ -1,0 +1,27 @@
+package NotePad;
+
+import java.awt.*;
+
+import javax.management.openmbean.OpenType;
+import javax.swing.*;
+
+
+
+public class AboutMemojang extends JDialog {
+	public AboutMemojang(Frame owner) {
+		super(owner,"메모장정보",true);//modal (true) modaless(false)
+		this.setSize(200,200);
+		//this.setModal(false);
+		Toolkit kit=Toolkit.getDefaultToolkit();
+		Image img= kit.getImage("jsk_icon");
+		ImageIcon icon = new ImageIcon ( Toolkit.getDefaultToolkit().getImage(getClass().getResource("jsk_icon.png")));
+		this.setIconImage(img);
+		
+		
+		
+		
+		this.setLocationRelativeTo(owner);
+		this.setVisible(true);
+		//이름 아이콘 이미지 저작권정보 언제 누가 왜 버전정보.
+	}
+}
