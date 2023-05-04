@@ -1,0 +1,7 @@
+package NotePad;
+
+import javax.swing.JDialog;
+
+public class AboutMemojang2 extends JDialog {
+
+}

@@ -1,0 +1,24 @@
+package NotePad;
+
+import java.awt.Frame;
+import java.awt.Image;
+import java.awt.Toolkit;
+
+import javax.swing.*;
+
+public class AboutMemojang2 extends JDialog {
+	
+	public AboutMemojang2(Frame owner) {
+		super(owner,"메모장정보",true);//modal (true) modaless(false)
+		this.setSize(500,300);
+		JPanel b= new JPanel();
+		JButton b1= new JButton("이건버튼");
+		JLabel l1= new JLabel((Icon) Toolkit.getDefaultToolkit().getImage(getClass().getResource("jsk_icon.png")));
+		b.add(l1);
+		b.add(b1);
+		this.add(b);
+		this.setVisible(true);
+		
+	}
+
+}
