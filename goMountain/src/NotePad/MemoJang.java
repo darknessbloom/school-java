@@ -7,12 +7,16 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import javax.swing.*;
 
 public class Memojang extends JFrame implements ActionListener{
 	// 전역변수 영역
 	JTextArea ta = new JTextArea();
+	
 	JButton newBtn, openBtn, saveBtn, exitBtn, copyBtn, pasteBtn, cutBtn, fontBtn, colBtn;
 	StatusBar stBar;
 	JFileChooser jfc;
@@ -23,6 +27,14 @@ public class Memojang extends JFrame implements ActionListener{
 	public Memojang() {
 		this.setTitle("길동이의 메모장...");			
 		JScrollPane sp = new JScrollPane(ta);
+		this.addWindowListener( new WindowAdapter() {
+		    public void windowOpened( WindowEvent e ){
+		        ta.requestFocus();
+		        
+		    }
+		}); 
+		
+		
 		ta.addKeyListener(new KeyAdapter() {//KeyAdapter() 여러메소드중 하나만 쓰고 싶을때,Adapter()사용
 			@Override
 			public void keyTyped(KeyEvent e) {
@@ -36,7 +48,7 @@ public class Memojang extends JFrame implements ActionListener{
 		
 		jfc = new JFileChooser();
 		
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		//this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setBounds(1000, 200, 500, 500);
 		this.setVisible(true);				
 	}
@@ -125,7 +137,65 @@ public class Memojang extends JFrame implements ActionListener{
 		edit.add(edit_find);edit.add(edit_replace);
 		edit.addSeparator();
 		edit.add(edit_datetime); edit.add(edit_all);
+		edit_cut.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				ta.cut();
+				
+				
+			}
+		});
+		edit_copy.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				ta.copy();
+				
+				
+			}
+		});
+		edit_paste.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				ta.paste();
+				
+				
+			}
+		});
+		edit_all.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				ta.selectAll();
+				
+				
+			}
+		});
 		
+		edit_datetime.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				Date d = new Date();
+				SimpleDateFormat sd = new SimpleDateFormat("yyyy-MM-dd aa HH:mm:ss");				
+				ta.append(sd.format(d));
+				
+				
+				
+			}
+		});
+	
+		
+		
+		
+		/////서식메뉴
 		JMenu form = new JMenu("서식");
 		JMenuItem form_font = new JMenuItem("글꼴");
 		JMenuItem form_fontColor = new JMenuItem("글자색");
@@ -164,33 +234,17 @@ public class Memojang extends JFrame implements ActionListener{
 		String cmd = e.getActionCommand();
 		if(cmd.equals("메모장 정보")) {
 			new AboutMemojang(this);
+			
 		}
 		else if(cmd.equals("새파일") || e.getSource() == newBtn) {
-			if (isNew==true) {
-				int yesno=JOptionPane.showConfirmDialog(this, "저장하시겠습니까?");
-				if(yesno==JOptionPane.YES_OPTION) {
-					save();
-					ta.setText("");
-					this.setTitle("jsk메모장");
-					
-					
-				}
-					
-				else if(yesno==JOptionPane.NO_OPTION) {
-					ta.setText("");
-					isNew=false;
-					
-				}
-				
-				
-					
-			}
-				
-			
-			
+			this.setTitle("jsk메모장");
+			filename=null;
+			saveCheck();
 		}
 		else if(cmd.equals("열기") || e.getSource() == openBtn) {
-			open();
+			int a=saveCheck();
+			if (a==0)
+				open();
 		}
 		else if(cmd.equals("저장") || e.getSource() == saveBtn) {
 			save();
@@ -201,9 +255,41 @@ public class Memojang extends JFrame implements ActionListener{
 			
 		}
 		else if(cmd.equals("끝내기") || e.getSource() == exitBtn) {
-			System.exit(1);
+			int a=saveCheck();
+			if (a==0)
+				System.exit(1);
+				
+				
 		}
 	}
+	public int saveCheck() {
+		int val=0;
+		if (isNew==true) {
+			int yesno=JOptionPane.showConfirmDialog(this, "저장하시겠습니까?");
+			if(yesno==JOptionPane.YES_OPTION) {
+				save();
+				ta.setText("");
+				
+			}
+				
+				
+			
+				
+			else if(yesno==JOptionPane.NO_OPTION) {
+				ta.setText("");
+				isNew=false;
+				
+			}
+			else if(yesno==JOptionPane.CANCEL_OPTION) {
+				val=1;
+			}
+			
+		}
+		return val;
+		
+	}
+		
+	
 	
 	public void open() {
 		int re = jfc.showOpenDialog(this);

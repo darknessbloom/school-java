@@ -1,3 +1,4 @@
+package phone;
 import java.awt.*;
 import java.awt.event.*;
 
@@ -27,7 +28,7 @@ public class playSwing extends JFrame implements ActionListener{
 		this.setTitle("first gui");
 		this.setSize(500,800);
 		this.setLocation(1420, 300);//음수 좌표 없음.
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		//setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setLayout(null);//맨위줄, 중앙에 차례로 배치
 		JPanel p1 =new JPanel();//배치방식 flowLayout
 		JPanel p2 =new JPanel();

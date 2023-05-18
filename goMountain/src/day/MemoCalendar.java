@@ -153,7 +153,7 @@ public class MemoCalendar extends CalendarDataManager{ // CalendarDataManager의
 	public MemoCalendar(){ //구성요소 순으로 정렬되어 있음. 각 판넬 사이에 빈줄로 구별
 		
 		mainFrame = new JFrame(title);
-		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		//mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		mainFrame.setSize(800,400);
 		mainFrame.setLocationRelativeTo(null);
 		mainFrame.setResizable(false);
